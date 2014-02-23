@@ -18,18 +18,22 @@ package org.inversebit.scp_algor_encam_gui.main;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.PrintStream;
 
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
-import javax.swing.JButton;
-import javax.swing.JTextArea;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 
 public class Main extends JFrame
@@ -61,11 +65,16 @@ public class Main extends JFrame
 	private JLabel lblErrores;
 	private JLabel lblErroresText;
 
+	private PipedOutputStream pipeStdOut;
+	private PipedInputStream pipeStdIn;
+	private PipedOutputStream pipeErrOut;
+	private PipedInputStream pipeErrIn;
+	
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args)
-	{
+	{				
 		EventQueue.invokeLater(new Runnable() {
 
 			public void run()
@@ -79,6 +88,7 @@ public class Main extends JFrame
 						    e.printStackTrace();
 						}
 					Main frame = new Main();
+					
 					frame.setVisible(true);
 				}
 				catch (Exception e)
@@ -87,6 +97,25 @@ public class Main extends JFrame
 				}
 			}
 		});
+	}
+
+	private void redirectSystemOutput()
+	{
+		pipeStdOut = new PipedOutputStream();
+		pipeErrOut = new PipedOutputStream();
+		
+		try
+		{
+			pipeStdIn = new PipedInputStream(pipeStdOut);
+			pipeErrIn = new PipedInputStream(pipeErrOut);
+		}
+		catch (IOException e1)
+		{
+			e1.printStackTrace();
+		}
+		
+		System.setOut(new PrintStream(pipeStdOut));
+		System.setErr(new PrintStream(pipeErrOut));	
 	}
 
 	/**
@@ -100,6 +129,7 @@ public class Main extends JFrame
 		setTitle("EncaminatorPlusGUI");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 509, 273);
+		setResizable(false);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -145,7 +175,7 @@ public class Main extends JFrame
 	private JTextField getTFk() {
 		if (tFk == null) {
 			tFk = new JTextField();
-			tFk.setBounds(140, 36, 29, 20);
+			tFk.setBounds(140, 36, 58, 20);
 			tFk.setColumns(10);
 		}
 		return tFk;
@@ -161,7 +191,7 @@ public class Main extends JFrame
 		if (tFn == null) {
 			tFn = new JTextField();
 			tFn.setColumns(10);
-			tFn.setBounds(140, 64, 29, 20);
+			tFn.setBounds(140, 64, 58, 20);
 		}
 		return tFn;
 	}
@@ -198,7 +228,7 @@ public class Main extends JFrame
 	private JTextField getTFOrigen() {
 		if (tFOrigen == null) {
 			tFOrigen = new JTextField();
-			tFOrigen.setBounds(140, 114, 29, 20);
+			tFOrigen.setBounds(140, 114, 58, 20);
 			tFOrigen.setColumns(10);
 		}
 		return tFOrigen;
@@ -207,7 +237,7 @@ public class Main extends JFrame
 		if (tFDestino == null) {
 			tFDestino = new JTextField();
 			tFDestino.setColumns(10);
-			tFDestino.setBounds(140, 139, 29, 20);
+			tFDestino.setBounds(140, 139, 58, 20);
 		}
 		return tFDestino;
 	}
@@ -216,8 +246,75 @@ public class Main extends JFrame
 			btnCalcular = new JButton("Calcular");
 			btnCalcular.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
+					getBtnCalcular().setEnabled(false);
+					
+					redirectSystemOutput();
+					
 					String[] args = extractArguments();
-					org.inversebit.scp_algor_encam.main.Main.main(args);
+					
+					org.inversebit.scp_algor_encam.main.Main.mainRet(args);
+					
+					try{
+						
+						if(pipeErrIn.available() > 0){
+							String error = "";
+							int errChar;
+							
+							while((errChar = pipeErrIn.read()) != 10){
+								error = error + (char)errChar;				
+							}
+	
+							getLblErroresText().setText(error);
+						}
+						else
+						{
+							int i = 0;
+							while(i < 3){
+								String result = "";
+								int aChar;
+								
+								while((aChar = pipeStdIn.read()) != 10){
+									result = result + (char)aChar;				
+								}
+								
+								String[] aux = result.split(":");
+								
+								switch(i){
+									case 0:
+										
+										getLblDistanciaResult().setText(aux[1]);
+										break;
+									case 1:
+										getLblREResult().setText(aux[1]);
+										break;
+									case 2:
+										getTAPasoResult().setText(aux[1]);
+										break;
+								}
+								
+								i++;
+							}
+						}
+					}
+					catch(IOException e)
+					{
+						e.printStackTrace();
+					}
+					
+					closeStreams();
+				}
+
+				private void closeStreams()
+				{
+					try{
+						pipeErrIn.close();
+						pipeErrOut.close();
+						pipeStdIn.close();
+						pipeStdOut.close();	
+					}
+					catch(IOException e){
+						e.printStackTrace();
+					}
 				}
 
 				private String[] extractArguments()
@@ -283,6 +380,7 @@ public class Main extends JFrame
 		if (lblPaso == null) {
 			lblPaso = new JLabel("Nodos por los que pasa el mensaje:");
 			lblPaso.setBounds(246, 92, 170, 14);
+			
 		}
 		return lblPaso;
 	}
@@ -291,6 +389,7 @@ public class Main extends JFrame
 			tAPasoResult = new JTextArea();
 			tAPasoResult.setEditable(false);
 			tAPasoResult.setBounds(246, 112, 237, 88);
+			tAPasoResult.setLineWrap(true);
 		}
 		return tAPasoResult;
 	}
