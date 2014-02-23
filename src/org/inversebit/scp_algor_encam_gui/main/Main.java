@@ -14,7 +14,7 @@
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.inversebit.main;
+package org.inversebit.scp_algor_encam_gui.main;
 
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -212,6 +212,7 @@ public class Main extends JFrame
 			btnCalcular = new JButton("Calcular");
 			btnCalcular.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
+					
 				}
 			});
 			btnCalcular.setBounds(20, 177, 89, 23);
