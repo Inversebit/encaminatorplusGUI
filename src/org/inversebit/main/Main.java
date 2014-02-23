@@ -266,6 +266,9 @@ public class Main extends JFrame
 			btnReset = new JButton("Resetear");
 			btnReset.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					Main m = new Main();
+					m.setVisible(true);
+					dispose();
 				}
 			});
 			btnReset.setBounds(135, 177, 89, 23);
