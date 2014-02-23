@@ -40,8 +40,8 @@ public class Main extends JFrame
 	private JLabel lblIntroText;
 	private JLabel lblk;
 	private JTextField tFk;
-	private JLabel tFn;
-	private JTextField lbln;
+	private JLabel lbln;
+	private JTextField tFn;
 	private JLabel lblanillo;
 	private JComboBox<String> cBAnillo;
 	private JLabel lblOrigen;
@@ -58,6 +58,8 @@ public class Main extends JFrame
 	private JLabel lblPaso;
 	private JTextArea tAPasoResult;
 	private JButton btnReset;
+	private JLabel lblErrores;
+	private JLabel lblErroresText;
 
 	/**
 	 * Launch the application.
@@ -97,7 +99,7 @@ public class Main extends JFrame
 	private void initialize() {
 		setTitle("EncaminatorPlusGUI");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 509, 247);
+		setBounds(100, 100, 509, 273);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -105,8 +107,8 @@ public class Main extends JFrame
 		contentPane.add(getLblIntroText());
 		contentPane.add(getLblk());
 		contentPane.add(getTFk());
-		contentPane.add(getTFn());
 		contentPane.add(getLbln());
+		contentPane.add(getTFn());
 		contentPane.add(getLblanillo());
 		contentPane.add(getCBAnillo());
 		contentPane.add(getLblOrigen());
@@ -123,6 +125,8 @@ public class Main extends JFrame
 		contentPane.add(getLblPaso());
 		contentPane.add(getTAPasoResult());
 		contentPane.add(getBtnReset());
+		contentPane.add(getLblErrores());
+		contentPane.add(getLblErroresText());
 	}
 	private JLabel getLblIntroText() {
 		if (lblIntroText == null) {
@@ -146,20 +150,20 @@ public class Main extends JFrame
 		}
 		return tFk;
 	}
-	private JLabel getTFn() {
-		if (tFn == null) {
-			tFn = new JLabel("N\u00FAmero de dimensiones:");
-			tFn.setBounds(20, 67, 122, 14);
-		}
-		return tFn;
-	}
-	private JTextField getLbln() {
+	private JLabel getLbln() {
 		if (lbln == null) {
-			lbln = new JTextField();
-			lbln.setColumns(10);
-			lbln.setBounds(140, 64, 29, 20);
+			lbln = new JLabel("N\u00FAmero de dimensiones:");
+			lbln.setBounds(20, 67, 122, 14);
 		}
 		return lbln;
+	}
+	private JTextField getTFn() {
+		if (tFn == null) {
+			tFn = new JTextField();
+			tFn.setColumns(10);
+			tFn.setBounds(140, 64, 29, 20);
+		}
+		return tFn;
 	}
 	private JLabel getLblanillo() {
 		if (lblanillo == null) {
@@ -212,7 +216,19 @@ public class Main extends JFrame
 			btnCalcular = new JButton("Calcular");
 			btnCalcular.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
-					
+					String[] args = extractArguments();
+					org.inversebit.scp_algor_encam.main.Main.main(args);
+				}
+
+				private String[] extractArguments()
+				{
+					String[] result = new String[5];
+					result[0] = getTFk().getText();
+					result[1] = getTFn().getText();
+					result[2] = Integer.toString(getCBAnillo().getSelectedIndex());
+					result[3] = getTFOrigen().getText();
+					result[4] = getTFDestino().getText();
+					return result;
 				}
 			});
 			btnCalcular.setBounds(20, 177, 89, 23);
@@ -259,7 +275,7 @@ public class Main extends JFrame
 	private JLabel getLblREResult() {
 		if (lblREResult == null) {
 			lblREResult = new JLabel("");
-			lblREResult.setBounds(297, 67, 46, 14);
+			lblREResult.setBounds(297, 67, 186, 14);
 		}
 		return lblREResult;
 	}
@@ -291,5 +307,19 @@ public class Main extends JFrame
 			btnReset.setBounds(135, 177, 89, 23);
 		}
 		return btnReset;
+	}
+	private JLabel getLblErrores() {
+		if (lblErrores == null) {
+			lblErrores = new JLabel("Errores:");
+			lblErrores.setBounds(20, 211, 39, 14);
+		}
+		return lblErrores;
+	}
+	private JLabel getLblErroresText() {
+		if (lblErroresText == null) {
+			lblErroresText = new JLabel("Ninguno");
+			lblErroresText.setBounds(63, 211, 420, 14);
+		}
+		return lblErroresText;
 	}
 }
